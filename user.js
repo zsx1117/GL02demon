@@ -64,18 +64,23 @@ function choseFunction(){
 function deleteUser(){
     let flag = false;
     rl.question("Input user name to delete: \n",function(answer){
-        userList.forEach(function (user) {
-            if (user.name == answer) {
-                flag = true;
-                return;
+        for(let i in userList){
+            if (userList[i].name == answer){
+                flag=true;
+                userList.splice(i,1);
+                break;
             }
-        });
+        }
+        if (!flag){
+            console.log("Can not find this user!");
+        }
+        writeUserList();
     });
 }
 
 
 function addNewUser() {
-    let userNew = new Object();
+    let userNew = {};
     let flag = true;
     console.log(userList);
     rl.question('Input user name: \n',function (answer)
@@ -118,5 +123,5 @@ function getAuth(userNew){
 });
 }
 
-console.log("2");
-getUserList().then(choseFunction).fail(console.error);
+// getUserList().then(choseFunction).fail(console.error);
+getUserList().then(deleteUser).fail(console.error);
