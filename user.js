@@ -38,15 +38,40 @@ function getUserList () {
 }
 
 function writeUserList(){
-    console.log("2");
     fs.writeFile('./userlist.json', JSON.stringify(userList),function (err) {
         if (err){
             console.log(err);
         }else{
-            console.log(userList);
             console.log("JSON has been saved");
+            outPutUserList();
         }
     });
+}
+
+function choseFunction(){
+    rl.question('Chose function: \n1. Show all\n2. Add user\n3. Delete user\nOthers Exit.\n',(answer)=>
+    {
+        switch (answer){
+            case '1':
+                outPutUserList();
+                choseFunction();
+                break;
+            case '2':
+                //addNewUser().then(choseFunction).fail(console.error);
+                addNewUser2().then(function(data){return getPwd2(data)}).then(function(data){return getAuth2(data)}).then(writeUserList);
+                break;
+            case '3':
+                deleteUser();
+                choseFunction();
+                break;
+            default:
+                break;
+        }
+    });
+}
+
+function main(){
+
 }
 
 function outPutUserList(){
@@ -56,7 +81,9 @@ function outPutUserList(){
 }
 
 
-function choseFunction(){
+
+
+function test(){
     outPutUserList();
     addNewUser();
 }
@@ -73,6 +100,7 @@ function deleteUser(){
         }
         if (!flag){
             console.log("Can not find this user!");
+            return;
         }
         writeUserList();
     });
@@ -82,39 +110,108 @@ function deleteUser(){
 function addNewUser() {
     let userNew = {};
     let flag = true;
-    console.log(userList);
+    var deferred = Q.defer();
     rl.question('Input user name: \n',function (answer)
     {
         userList.forEach(function (user) {
             if (user.name == answer) {
                 console.log("This name has been used!");
                 flag = false;
-                return;
+                deferred.resolve(true);
+                return deferred.promise;
             }
         });
         if (flag) {
             userNew.name = answer;
             console.log("SUCCESS");
-            getPwd(userNew);
+            getPwd(userNew,deferred);
         }
+        deferred.resolve(true);
     });
+    return deferred.promise;
 }
 
-function getPwd(userNew){
+function addNewUser2() {
+    let userNew = {};
+    let flag = true;
+    var deferred = Q.defer();
+    rl.question('Input user name: \n',function (answer)
+    {
+        userList.forEach(function (user) {
+            if (user.name == answer) {
+                console.log("This name has been used!");
+                flag = false;
+                deferred.resolve(false);
+                return deferred.promise;
+            }
+        });
+        if (flag) {
+            userNew.name = answer;
+            console.log("SUCCESS");
+            deferred.resolve(userNew);
+        }
+    });
+    return deferred.promise;
+}
+
+function getPwd2(userNew){
+    var deferred = Q.defer();
+    if(userNew){
+        rl.question('Input user password: \n',(answer)=>
+        {
+            userNew.pwd = answer;
+            console.log("SUCCESS");
+            deferred.resolve(userNew);
+            return deferred.promise;
+        });
+    }
+    else{
+        deferred.resolve(false);
+        return deferred.promise;
+    }
+}
+
+
+
+function getPwd(userNew,deferred){
     rl.question('Input user password: \n',(answer)=>
     {
         userNew.pwd = answer;
-    console.log("SUCCESS");
-    getAuth(userNew);
-});
+        console.log("SUCCESS");
+        getAuth(userNew,deferred);
+    });
 }
 
-function getAuth(userNew){
+function getAuth2(userNew){
+    var deferred = Q.defer();
+    if (userNew){
+        rl.question('Input user type: 1 is intervenant, 2 is bénéficiaire, the others are exit: \n',(answer)=>
+        {
+            if (answer != '1' && answer != '2'){
+                console.log("Exit");
+                deferred.resolve(false);
+                return deferred.promise;
+            }
+            userNew.authen = answer;
+            console.log("SUCCESS");
+            userList.push(userNew);
+            deferred.resolve(true);
+            return deferred.promise;
+        });
+    }
+    else{
+        deferred.resolve(false);
+        return deferred.promise;
+    }
+}
+
+function getAuth(userNew,deferred){
     rl.question('Input user type: 1 is intervenant, 2 is bénéficiaire, the others are exit: \n',(answer)=>
     {
         if (answer != '1' && answer != '2'){
         console.log("Exit");
-        return;
+        deferred.resolve(true);
+        return deferred.promise;
     }
     userNew.authen = answer;
     console.log("SUCCESS");
@@ -122,6 +219,5 @@ function getAuth(userNew){
     writeUserList();
 });
 }
-
-// getUserList().then(choseFunction).fail(console.error);
-getUserList().then(deleteUser).fail(console.error);
+//getUserList().then(test).fail(console.error);
+getUserList().then(choseFunction).fail(console.error);
