@@ -48,6 +48,7 @@ function writeUserList(){
     });
 }
 
+
 function choseFunction(){
     rl.question('Chose function: \n1. Show all\n2. Add user\n3. Delete user\nOthers Exit.\n',(answer)=>
     {
@@ -162,13 +163,12 @@ function getPwd2(userNew){
             userNew.pwd = answer;
             console.log("SUCCESS");
             deferred.resolve(userNew);
-            return deferred.promise;
         });
     }
     else{
         deferred.resolve(false);
-        return deferred.promise;
     }
+    return deferred.promise;
 }
 
 
@@ -220,4 +220,4 @@ function getAuth(userNew,deferred){
 });
 }
 //getUserList().then(test).fail(console.error);
-getUserList().then(choseFunction).fail(console.error);
+getUserList().then(function(){choseFunction()}).fail(console.error);
