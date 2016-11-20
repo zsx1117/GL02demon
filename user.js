@@ -1,5 +1,7 @@
+"use strict";
+
 var fs = require('fs');
-var Q = require('Q');
+var Q = require('q');
 const readline = require('readline');
 var userList = [];
 
@@ -59,7 +61,11 @@ function choseFunction(){
                 break;
             case '2':
                 //addNewUser().then(choseFunction).fail(console.error);
-                addNewUser2().then(function(data){return getPwd2(data)}).then(function(data){return getAuth2(data)}).then(writeUserList);
+                addNewUser2().then(function (data) {
+                    return getPwd2(data)
+                }).then(function (data) {
+                    return getAuth2(data)
+                }).then(writeUserList);
                 break;
             case '3':
                 deleteUser();
@@ -190,19 +196,18 @@ function getAuth2(userNew){
             if (answer != '1' && answer != '2'){
                 console.log("Exit");
                 deferred.resolve(false);
-                return deferred.promise;
+            }else{
+                userNew.authen = answer;
+                console.log("SUCCESS");
+                userList.push(userNew);
+                deferred.resolve(true);
             }
-            userNew.authen = answer;
-            console.log("SUCCESS");
-            userList.push(userNew);
-            deferred.resolve(true);
-            return deferred.promise;
         });
     }
     else{
         deferred.resolve(false);
-        return deferred.promise;
     }
+    return deferred.promise;
 }
 
 function getAuth(userNew,deferred){
